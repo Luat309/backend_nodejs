@@ -6,46 +6,54 @@ import { Server } from "socket.io";
 import cors from "cors";
 import helmet from "helmet";
 import compression from "compression"; 
+import bodyParser from "body-parser";
 
 import { createNotification } from "./app/utils/notification.js";
 import sql from "./config/database.js";
+import { NOTIFICATION_TYPE } from "./constants/index.js";
 
 dotenv.config();
 const PORT = process.env.PORT || 3000;
+const ORIGIN_CLIENT = process.env.ORIGIN_CLIENT;
 
 const app = express();
 app.use(cors());
 app.use(helmet());
 app.use(compression());
+app.use(bodyParser.json());
 
 const httpServer = createServer(app);
 
 const io = new Server(httpServer, {
     path: "/sskpi/",
     cors: {
-        origin: "http://localhost:8080",
+        origin: ORIGIN_CLIENT,
         methods: ["GET", "POST"]
     }
 });
 
 io.on("connection", (socket) => {
-    console.log("Client connection with socket id = " + socket.id);
 
     socket.on("push_notification", (data) => {
-        console.log("req", data);
-        createNotification(data)
+        // console.log("req", data);
+        createNotification(data);
 
-        socket.emit("res_notification", data);
+        io.emit("res_notification", data);
+
     })
+
 })
 
 httpServer.listen(PORT);
 
-app.get("/api/node/notifications", (_req, res) => {
-        sql.query("SELECT * FROM notifications", (err, results, fields) => {
-        if(err) throw err;
+app.post("/api/node/notifications", (req, res) => {
+    console.log(req.body);
 
-        res.json(results);
+    sql.query("SELECT * FROM notifications", (err, results, fields) => {
+        if(err) throw err;
+        const response = results.filter(item => Number(item.userCreated) !== req.body.id);
+
+        res.json(response);
     })
 })
 
@@ -60,5 +68,3 @@ app.get("/api/node/notifications", (_req, res) => {
 // app.get("*", (_req, res) => {
 //     res.send("Not found page");
 // });
-
-// van de beek
