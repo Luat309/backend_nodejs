@@ -14,6 +14,7 @@ import { NOTIFICATION_TYPE } from "./constants/index.js";
 
 dotenv.config();
 const PORT = process.env.PORT || 3000;
+const HOST = process.env.HOST
 const ORIGIN_CLIENT = process.env.ORIGIN_CLIENT;
 
 const app = express();
@@ -44,7 +45,7 @@ io.on("connection", (socket) => {
 
 })
 
-httpServer.listen(PORT);
+httpServer.listen(PORT, HOST);
 
 app.post("/api/node/notifications", (req, res) => {
     console.log(req.body);
