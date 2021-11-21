@@ -52,20 +52,13 @@ app.post("/api/node/notifications", (req, res) => {
 
     sql.query("SELECT * FROM notifications", (err, results, fields) => {
         if(err) throw err;
-        const response = results.filter(item => Number(item.userCreated) !== req.body.id);
+        
+        const response = results
+            .filter(item => Number(item.userCreated) !== req.body.id)
+            .filter(item => NOTIFICATION_TYPE[item.type].indexOf(req.body.role) !== -1)
+            .reverse();
 
         res.json(response);
     })
 })
 
-// app.get("/candidate", (_req, res) => {
-//     sql.query("SELECT * FROM candidates", (err, results, fields) => {
-//         if(err) throw err;
-
-//         res.json(results);
-//     })
-// })
-
-// app.get("*", (_req, res) => {
-//     res.send("Not found page");
-// });
