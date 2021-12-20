@@ -57,7 +57,7 @@ app.post("/api/node/notifications", (req, res) => {
             .filter(item => Number(item.userCreated) !== req.body.id)
             .filter(item => NOTIFICATION_TYPE[item.type].indexOf(req.body.role) !== -1)
             .reverse();
-
+            
         res.json(response);
     })
 })
